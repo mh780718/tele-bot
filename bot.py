@@ -11,9 +11,8 @@ SYSTEM_PROMPT = """
 تشرح كل شيء بطريقة تعليمية، خطوة بخطوة، وبأمثلة،
 وبلغة عربية واضحة وبسيطة.
 """
-
 def ask_deepseek(message):
-    url = "https://api.deepseek.com/chat/completions"
+    url = "https://api.deepseek.com/v1/chat/completions"
 
     headers = {
         "Authorization": f"Bearer {DEEPSEEK_API_KEY}",
@@ -29,8 +28,12 @@ def ask_deepseek(message):
         "temperature": 0.7
     }
 
-    r = requests.post(url, headers=headers, json=data)
-    return r.json()["choices"][0]["message"]["content"]
+    try:
+        r = requests.post(url, headers=headers, json=data, timeout=60)
+        r.raise_for_status()
+        return r.json()["choices"][0]["message"]["content"]
+    except Exception as e:
+        return "❌ حدث خطأ في الاتصال بـ DeepSeek. تأكد من المفتاح أو حاول مرة أخرى."
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("👋 أنا مدرسك الذكي Study Explainer. اسألني أي شيء!")
