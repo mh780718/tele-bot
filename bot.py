@@ -1,18 +1,50 @@
 import os
+import requests
 from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters, ContextTypes
 
-TOKEN = os.getenv("BOT_TOKEN")
+BOT_TOKEN = os.getenv("BOT_TOKEN")
+DEEPSEEK_API_KEY = os.getenv("solo")
+
+SYSTEM_PROMPT = """
+أنت Study Explainer:
+تشرح كل شيء بطريقة تعليمية، خطوة بخطوة، وبأمثلة،
+وبلغة عربية واضحة وبسيطة.
+"""
+
+def ask_deepseek(message):
+    url = "https://api.deepseek.com/chat/completions"
+
+    headers = {
+        "Authorization": f"Bearer {DEEPSEEK_API_KEY}",
+        "Content-Type": "application/json"
+    }
+
+    data = {
+        "model": "deepseek-chat",
+        "messages": [
+            {"role": "system", "content": SYSTEM_PROMPT},
+            {"role": "user", "content": message}
+        ],
+        "temperature": 0.7
+    }
+
+    r = requests.post(url, headers=headers, json=data)
+    return r.json()["choices"][0]["message"]["content"]
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("مرحباً! أنا بوتك يعمل 24/7 🤖")
+    await update.message.reply_text("👋 أنا مدرسك الذكي Study Explainer. اسألني أي شيء!")
 
-async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text(update.message.text)
+async def chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_text = update.message.text
+    await update.message.reply_text("⏳ أفكر...")
 
-app = ApplicationBuilder().token(TOKEN).build()
+    reply = ask_deepseek(user_text)
+    await update.message.reply_text(reply)
+
+app = ApplicationBuilder().token(BOT_TOKEN).build()
 app.add_handler(CommandHandler("start", start))
-app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, echo))
+app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, chat))
 
-print("Bot is running...")
+print("Bot running...")
 app.run_polling()
