@@ -12,6 +12,9 @@ SYSTEM_PROMPT = """
 وبلغة عربية واضحة وبسيطة.
 """
 def ask_deepseek(message):
+    if not DEEPSEEK_API_KEY:
+        return "❌ لم يتم وضع مفتاح DeepSeek في Render."
+
     url = "https://api.deepseek.com/v1/chat/completions"
 
     headers = {
@@ -24,17 +27,14 @@ def ask_deepseek(message):
         "messages": [
             {"role": "system", "content": SYSTEM_PROMPT},
             {"role": "user", "content": message}
-        ],
-        "temperature": 0.7
+        ]
     }
 
     try:
         r = requests.post(url, headers=headers, json=data, timeout=60)
-        r.raise_for_status()
-        return r.json()["choices"][0]["message"]["content"]
+        return f"🔎 DeepSeek HTTP {r.status_code}: {r.text}"
     except Exception as e:
-        return "❌ حدث خطأ في الاتصال بـ DeepSeek. تأكد من المفتاح أو حاول مرة أخرى."
-
+        return f"❌ اتصال فشل: {str(e)}"
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("👋 mhnd أنا مدرسك الذكي Study Explainer. اسألني أي شيء!")
 
