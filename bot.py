@@ -36,7 +36,7 @@ def ask_deepseek(message):
         return "❌ حدث خطأ في الاتصال بـ DeepSeek. تأكد من المفتاح أو حاول مرة أخرى."
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("👋 أنا مدرسك الذكي Study Explainer. اسألني أي شيء!")
+    await update.message.reply_text("👋 mhnd أنا مدرسك الذكي Study Explainer. اسألني أي شيء!")
 
 async def chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_text = update.message.text
