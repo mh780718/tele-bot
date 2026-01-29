@@ -42,9 +42,11 @@ async def chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_text = update.message.text
     await update.message.reply_text("⏳ أفكر...")
 
-    reply = ask_deepseek(user_text)
-    await update.message.reply_text(reply)
-
+    try:
+        reply = ask_deepseek(user_text)
+        await update.message.reply_text(reply)
+    except Exception as e:
+        await update.message.reply_text("❌ DeepSeek لا يرد الآن. تحقق من المفتاح.")
 app = ApplicationBuilder().token(BOT_TOKEN).build()
 app.add_handler(CommandHandler("start", start))
 app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, chat))
